@@ -328,7 +328,9 @@ def _upsert_batched(client, table: str, records: list[dict]) -> int:
 
 
 def write_ltv_scores(client, scores: pd.DataFrame) -> None:
-    n = _upsert_batched(client, "ltv_scores", _df_to_records(scores))
+    # cohort lives in the players table — drop it to match ltv_scores schema
+    cols = [c for c in scores.columns if c != "cohort"]
+    n = _upsert_batched(client, "ltv_scores", _df_to_records(scores[cols]))
     logger.info("Wrote %d rows to 'ltv_scores'", n)
 
 
