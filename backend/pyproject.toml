@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "playerltvstudio"
 version = "0.1.0"
-requires-python = ">=3.11"
+requires-python = ">=3.9"
 dependencies = [
     "fastapi",
     "uvicorn[standard]",
@@ -22,6 +22,9 @@ dev = [
     "pytest",
     "ruff",
 ]
+
+[tool.hatch.build.targets.wheel]
+packages = ["etl", "models", "api"]
 
 [tool.ruff]
 line-length = 100

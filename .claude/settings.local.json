@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(python data/generate_events.py)"
+      "Bash(python data/generate_events.py)",
+      "Bash(python -m pytest tests/test_etl.py -v)"
     ]
   }
 }
