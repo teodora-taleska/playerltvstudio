@@ -171,6 +171,15 @@ def _run_pipeline_sequence() -> None:
 # ---------------------------------------------------------------------------
 
 
+def _db_error(exc: Exception, context: str) -> HTTPException:
+    """Convert a Supabase / network exception into a structured 503 response."""
+    logger.error("%s failed: %s", context, exc)
+    return HTTPException(
+        status_code=503,
+        detail=f"Database error in {context}: {exc}",
+    )
+
+
 @app.get("/health")
 def health():
     return {"status": "ok"}
@@ -188,37 +197,45 @@ def get_players(
     Ordered by expected_ltv_90d descending.
     """
     if segment and segment not in ("high_ltv", "mid_ltv", "low_ltv"):
-        raise HTTPException(status_code=422, detail="segment must be high_ltv, mid_ltv, or low_ltv")
+        raise HTTPException(
+            status_code=422, detail="segment must be high_ltv, mid_ltv, or low_ltv"
+        )
 
-    # Count total (for pagination metadata)
-    count_query = db.table("ltv_scores").select("player_id", count="exact")
-    if segment:
-        count_query = count_query.eq("segment", segment)
-    total = count_query.execute().count or 0
+    try:
+        # Count total (for pagination metadata)
+        count_query = db.table("ltv_scores").select("player_id", count="exact")
+        if segment:
+            count_query = count_query.eq("segment", segment)
+        total = count_query.execute().count or 0
 
-    # Fetch LTV scores page
-    ltv_query = (
-        db.table("ltv_scores")
-        .select("*")
-        .order("expected_ltv_90d", desc=True)
-        .range(offset, offset + limit - 1)
-    )
-    if segment:
-        ltv_query = ltv_query.eq("segment", segment)
-    ltv_rows = ltv_query.execute().data
+        # Fetch LTV scores page
+        ltv_query = (
+            db.table("ltv_scores")
+            .select("*")
+            .order("expected_ltv_90d", desc=True)
+            .range(offset, offset + limit - 1)
+        )
+        if segment:
+            ltv_query = ltv_query.eq("segment", segment)
+        ltv_rows = ltv_query.execute().data
+    except Exception as exc:
+        raise _db_error(exc, "GET /players") from exc
 
     if not ltv_rows:
         return PlayerPage(total=total, limit=limit, offset=offset, items=[])
 
-    # Fetch player metadata for this page
-    player_ids = [r["player_id"] for r in ltv_rows]
-    player_rows = (
-        db.table("players")
-        .select("player_id, cohort, install_date, frequency, monetary")
-        .in_("player_id", player_ids)
-        .execute()
-        .data
-    )
+    try:
+        player_ids = [r["player_id"] for r in ltv_rows]
+        player_rows = (
+            db.table("players")
+            .select("player_id, cohort, install_date, frequency, monetary")
+            .in_("player_id", player_ids)
+            .execute()
+            .data
+        )
+    except Exception as exc:
+        raise _db_error(exc, "GET /players (player metadata)") from exc
+
     players_by_id = {p["player_id"]: p for p in player_rows}
 
     items = []
@@ -245,14 +262,18 @@ def get_players(
 def get_segments(db: Client = Depends(get_db)):
     """
     Aggregate count and average LTV per segment.
-    Returns all three segments in fixed order: high → mid → low.
+    Returns all three segments in fixed order: high -> mid -> low.
     """
-    rows = (
-        db.table("ltv_scores")
-        .select("segment, expected_ltv_90d")
-        .execute()
-        .data
-    )
+    try:
+        rows = (
+            db.table("ltv_scores")
+            .select("segment, expected_ltv_90d")
+            .execute()
+            .data
+        )
+    except Exception as exc:
+        raise _db_error(exc, "GET /segments") from exc
+
     if not rows:
         return []
 
@@ -277,13 +298,17 @@ def get_segments(db: Client = Depends(get_db)):
 @app.get("/campaigns", response_model=list[CampaignResult])
 def get_campaigns(db: Client = Depends(get_db)):
     """Return all campaign ROI results ordered by ROAS descending."""
-    rows = (
-        db.table("campaign_results")
-        .select("*")
-        .order("roas", desc=True)
-        .execute()
-        .data
-    )
+    try:
+        rows = (
+            db.table("campaign_results")
+            .select("*")
+            .order("roas", desc=True)
+            .execute()
+            .data
+        )
+    except Exception as exc:
+        raise _db_error(exc, "GET /campaigns") from exc
+
     results = []
     for r in rows:
         results.append(CampaignResult(
@@ -295,7 +320,9 @@ def get_campaigns(db: Client = Depends(get_db)):
             avg_ltv_acquired=float(r["avg_ltv_acquired"]),
             total_predicted_revenue_90d=float(r["total_predicted_revenue_90d"]),
             roas=float(r["roas"]),
-            payback_period_days=float(r["payback_period_days"]) if r["payback_period_days"] else None,
+            payback_period_days=(
+                float(r["payback_period_days"]) if r["payback_period_days"] else None
+            ),
             is_profitable=bool(r["is_profitable"]),
         ))
     return results
