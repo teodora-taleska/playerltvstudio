@@ -207,3 +207,4 @@ marimo/_lsp/
 __marimo__/
 /backend/.env
 backend/data/raw/player_events.csv
+/frontend/.env.local
