@@ -108,7 +108,7 @@ def segmented(scores) -> pd.DataFrame:
 
 class TestBuildModelInputs:
     def test_required_columns_present(self, inputs):
-        required = {"player_id", "cohort", "frequency", "recency", "T", "monetary_value", "monetary"}
+        required = {"player_id", "cohort", "frequency", "recency", "T", "monetary_value", "monetary"}  # noqa: E501
         assert required.issubset(inputs.columns)
 
     def test_one_row_per_player(self, rfm, inputs):

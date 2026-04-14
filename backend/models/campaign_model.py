@@ -273,8 +273,8 @@ def plot_campaign_comparison(results: pd.DataFrame, output_path: Path) -> None:
     # ── Panel 1: Spend vs Revenue ────────────────────────────────────────────
     ax = axes[0, 0]
     w = 0.35
-    bars_spend = ax.bar(x - w / 2, results["spend"],
-                        width=w, label="Ad Spend", color="#AAAAAA", edgecolor="white")
+    ax.bar(x - w / 2, results["spend"],
+           width=w, label="Ad Spend", color="#AAAAAA", edgecolor="white")
     bars_rev = ax.bar(x + w / 2, results["total_predicted_revenue_90d"],
                       width=w, label="Predicted Revenue 90d", color=colors, edgecolor="white")
 

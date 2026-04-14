@@ -17,7 +17,6 @@ from pydantic import ValidationError
 from etl.pipeline import aggregate_rfm, aggregate_sessions, validate_events
 from etl.schemas import PlayerEvent
 
-
 # Helpers
 
 def make_event(**overrides) -> dict:
