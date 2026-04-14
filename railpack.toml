@@ -1,0 +1,6 @@
+[config]
+workingDirectory = "frontend"
+
+[providers.node]
+buildCommand = "npm run build"
+startCommand = "npm run start"
