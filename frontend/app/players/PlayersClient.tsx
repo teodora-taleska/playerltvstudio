@@ -127,17 +127,18 @@ export default function PlayersClient() {
         )}
 
         {!error && (
-          <table className="w-full text-sm">
+          <div className="overflow-x-auto">
+          <table className="w-full text-sm min-w-[700px]">
             <thead className="border-b border-gray-800">
               <tr className="text-gray-500">
-                <th className="text-left px-4 py-3 font-medium">Player ID</th>
-                <th className="text-left px-4 py-3 font-medium">Segment</th>
-                <th className="text-right px-4 py-3 font-medium">LTV (90d)</th>
-                <th className="text-right px-4 py-3 font-medium">Churn Prob</th>
-                <th className="text-right px-4 py-3 font-medium">Sessions 30d</th>
-                <th className="text-right px-4 py-3 font-medium">Sessions 90d</th>
-                <th className="text-right px-4 py-3 font-medium">Total Spend</th>
-                <th className="text-right px-4 py-3 font-medium">Install Date</th>
+                <th className="text-left px-4 py-3 font-medium whitespace-nowrap">Player ID</th>
+                <th className="text-left px-4 py-3 font-medium whitespace-nowrap">Segment</th>
+                <th className="text-right px-4 py-3 font-medium whitespace-nowrap">LTV (90d)</th>
+                <th className="text-right px-4 py-3 font-medium whitespace-nowrap">Churn Prob</th>
+                <th className="text-right px-4 py-3 font-medium whitespace-nowrap">Sessions 30d</th>
+                <th className="text-right px-4 py-3 font-medium whitespace-nowrap">Sessions 90d</th>
+                <th className="text-right px-4 py-3 font-medium whitespace-nowrap">Total Spend</th>
+                <th className="text-right px-4 py-3 font-medium whitespace-nowrap">Install Date</th>
               </tr>
             </thead>
             <tbody>
@@ -198,6 +199,7 @@ export default function PlayersClient() {
               )}
             </tbody>
           </table>
+          </div>
         )}
       </div>
 
@@ -205,7 +207,7 @@ export default function PlayersClient() {
       {data && data.total > PAGE_SIZE && (
         <div className="flex items-center justify-between mt-4 text-sm text-gray-500">
           <span>
-            Showing {offset + 1}–{Math.min(offset + PAGE_SIZE, data.total)} of{" "}
+            Showing {offset + 1} to {Math.min(offset + PAGE_SIZE, data.total)} of{" "}
             {data.total.toLocaleString()} players
           </span>
           <div className="flex items-center gap-2">

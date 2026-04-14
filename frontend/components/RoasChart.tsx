@@ -20,9 +20,16 @@ const COLORS: Record<string, string> = {
   retargeting: "#10b981",
 };
 
+// Short labels for mobile x-axis
+const SHORT_LABELS: Record<string, string> = {
+  broad_acquisition: "Broad",
+  whales_only: "Whales",
+  retargeting: "Retarget",
+};
+
 export default function RoasChart({ campaigns }: { campaigns: CampaignResult[] }) {
   const data = {
-    labels: campaigns.map((c) => c.campaign_name.replace("_", " ")),
+    labels: campaigns.map((c) => SHORT_LABELS[c.campaign_name] ?? c.campaign_name),
     datasets: [
       {
         label: "ROAS",
@@ -36,20 +43,36 @@ export default function RoasChart({ campaigns }: { campaigns: CampaignResult[] }
 
   const options: ChartOptions<"bar"> = {
     responsive: true,
+    maintainAspectRatio: false,
     plugins: {
       legend: { display: false },
       tooltip: {
         callbacks: {
+          title: (items) => {
+            // Show full name in tooltip
+            const idx = items[0].dataIndex;
+            return campaigns[idx].campaign_name.replace(/_/g, " ");
+          },
           label: (ctx) => ` ROAS: ${(ctx.raw as number).toFixed(2)}x`,
+          afterLabel: (ctx) => {
+            const c = campaigns[ctx.dataIndex];
+            return [
+              ` Spend: $${c.spend.toLocaleString()}`,
+              ` Revenue: $${c.total_predicted_revenue_90d.toLocaleString()}`,
+              ` Players: ${c.n_players.toLocaleString()}`,
+            ].join("\n");
+          },
         },
       },
     },
     scales: {
       x: {
-        ticks: { color: "#9ca3af" },
+        ticks: { color: "#9ca3af", font: { size: 12 } },
         grid: { color: "#1f2937" },
       },
       y: {
+        // Add top padding so break-even label isn't clipped
+        suggestedMax: Math.max(...campaigns.map((c) => c.roas)) * 1.2,
         ticks: {
           color: "#9ca3af",
           callback: (v) => `${v}x`,
@@ -57,11 +80,9 @@ export default function RoasChart({ campaigns }: { campaigns: CampaignResult[] }
         grid: { color: "#1f2937" },
       },
     },
-    // Draw break-even line via annotation plugin isn't available,
-    // so we use a custom afterDraw instead
   };
 
-  // Plugin to draw a break-even reference line at ROAS = 1
+  // Break-even reference line at ROAS = 1
   const breakEvenPlugin = {
     id: "breakEvenLine",
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -82,17 +103,25 @@ export default function RoasChart({ campaigns }: { campaigns: CampaignResult[] }
       ctx.save();
       ctx.fillStyle = "#9ca3af";
       ctx.font = "11px sans-serif";
-      ctx.fillText("Break-even", chartArea.right - 76, y - 5);
+      // Place label above the line with breathing room
+      ctx.fillText("Break-even", chartArea.right - 80, y - 8);
       ctx.restore();
     },
   };
 
   return (
     <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-      <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-5">
-        ROAS by Campaign
-      </h2>
-      <Bar data={data} options={options} plugins={[breakEvenPlugin]} />
+      <div className="flex items-start justify-between mb-5 gap-2">
+        <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">
+          ROAS by Campaign
+        </h2>
+        <span className="text-xs text-gray-600 hidden sm:block">Tap a bar for details</span>
+        <span className="text-xs text-gray-600 sm:hidden">Tap bars for details</span>
+      </div>
+      {/* Fixed height so chart is tall enough on all screens */}
+      <div className="h-64 sm:h-80">
+        <Bar data={data} options={options} plugins={[breakEvenPlugin]} />
+      </div>
     </div>
   );
 }

@@ -28,7 +28,7 @@ export default async function OverviewPage() {
       <div className="mb-8">
         <h1 className="text-xl font-bold text-white">Overview</h1>
         <p className="text-sm text-gray-500 mt-1">
-          LTV model summary &mdash; {page.total.toLocaleString()} players scored
+          LTV model summary: {page.total.toLocaleString()} players scored
         </p>
       </div>
 
@@ -70,45 +70,47 @@ export default async function OverviewPage() {
           </div>
         )}
 
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 overflow-hidden">
           <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">
             Segment Breakdown
           </h2>
           {segments.length === 0 ? (
             <p className="text-gray-500 text-sm">No data.</p>
           ) : (
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-gray-500 border-b border-gray-800">
-                  <th className="text-left pb-2 font-medium">Segment</th>
-                  <th className="text-right pb-2 font-medium">Players</th>
-                  <th className="text-right pb-2 font-medium">Avg LTV</th>
-                  <th className="text-right pb-2 font-medium">Total LTV</th>
-                  <th className="text-right pb-2 font-medium">Share</th>
-                </tr>
-              </thead>
-              <tbody>
-                {segments.map((s) => (
-                  <tr key={s.segment} className="border-b border-gray-800/50">
-                    <td className="py-3 text-gray-300 capitalize">
-                      {s.segment.replace("_", " ")}
-                    </td>
-                    <td className="py-3 text-right text-gray-300">
-                      {s.count.toLocaleString()}
-                    </td>
-                    <td className="py-3 text-right text-gray-300">
-                      ${s.avg_ltv_90d.toFixed(2)}
-                    </td>
-                    <td className="py-3 text-right text-gray-300">
-                      ${s.total_ltv_90d.toLocaleString()}
-                    </td>
-                    <td className="py-3 text-right text-gray-400">
-                      {s.pct_of_players}%
-                    </td>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm min-w-[360px]">
+                <thead>
+                  <tr className="text-gray-500 border-b border-gray-800">
+                    <th className="text-left pb-2 font-medium whitespace-nowrap">Segment</th>
+                    <th className="text-right pb-2 font-medium whitespace-nowrap">Players</th>
+                    <th className="text-right pb-2 font-medium whitespace-nowrap">Avg LTV</th>
+                    <th className="text-right pb-2 font-medium whitespace-nowrap">Total LTV</th>
+                    <th className="text-right pb-2 font-medium whitespace-nowrap">Share</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {segments.map((s) => (
+                    <tr key={s.segment} className="border-b border-gray-800/50">
+                      <td className="py-3 text-gray-300 capitalize whitespace-nowrap">
+                        {s.segment.replace("_", " ")}
+                      </td>
+                      <td className="py-3 text-right text-gray-300 whitespace-nowrap">
+                        {s.count.toLocaleString()}
+                      </td>
+                      <td className="py-3 text-right text-gray-300 whitespace-nowrap">
+                        ${s.avg_ltv_90d.toFixed(2)}
+                      </td>
+                      <td className="py-3 text-right text-gray-300 whitespace-nowrap">
+                        ${s.total_ltv_90d.toLocaleString()}
+                      </td>
+                      <td className="py-3 text-right text-gray-400 whitespace-nowrap">
+                        {s.pct_of_players}%
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
       </div>
