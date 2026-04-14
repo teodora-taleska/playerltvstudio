@@ -4,8 +4,5 @@ buildPath = "backend"
 [[providers]]
 name = "python"
 
-[build]
-installCommand = "pip install -e ."
-
 [deploy]
 startCommand = "python -m uvicorn api.main:app --host 0.0.0.0 --port $PORT"

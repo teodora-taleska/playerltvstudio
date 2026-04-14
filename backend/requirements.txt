@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+pandas
+lifetimes
+supabase
+pydantic
+apscheduler
+python-dotenv
+matplotlib
+numpy
