@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Users, Megaphone, Gem, Menu, X } from "lucide-react";
+import { LayoutDashboard, Users, Megaphone, Gem, ChevronLeft, ChevronRight } from "lucide-react";
 import { useState, useEffect } from "react";
 
 const links = [
@@ -11,98 +11,94 @@ const links = [
   { href: "/campaigns", label: "Campaigns", icon: Megaphone },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ onOpenChange }: { onOpenChange?: (open: boolean) => void }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
-  // Close on route change (mobile nav tap)
+  const toggle = (value: boolean) => {
+    setOpen(value);
+    onOpenChange?.(value);
+  };
+
+  // Close on route change
   useEffect(() => {
-    setOpen(false);
+    toggle(false);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
-  // Close on Escape key
+  // Close on Escape
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
-    };
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") toggle(false); };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // Prevent body scroll when sidebar is open on mobile
-  useEffect(() => {
-    document.body.style.overflow = open ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
-  }, [open]);
 
   return (
     <>
-      {/* Mobile toggle button */}
-      <button
-        onClick={() => setOpen((o) => !o)}
-        className="fixed top-4 left-4 z-50 p-2 rounded-lg bg-gray-900 border border-gray-800 text-gray-400 hover:text-white transition-colors lg:hidden"
-        aria-label="Toggle navigation"
-      >
-        {open ? <X size={20} /> : <Menu size={20} />}
-      </button>
-
-      {/* Desktop collapse button — inside sidebar when open, floating when closed */}
-      <button
-        onClick={() => setOpen((o) => !o)}
-        className={`hidden lg:flex fixed top-4 z-50 p-1.5 rounded-lg bg-gray-800 border border-gray-700 text-gray-400 hover:text-white transition-all duration-300 ${
-          open ? "left-[13.5rem]" : "left-4"
-        }`}
-        aria-label="Toggle navigation"
-      >
-        {open ? <X size={16} /> : <Menu size={16} />}
-      </button>
-
-      {/* Backdrop — mobile only */}
+      {/* Backdrop for mobile */}
       {open && (
         <div
-          className="fixed inset-0 z-30 bg-black/60 backdrop-blur-sm lg:hidden"
-          onClick={() => setOpen(false)}
+          className="fixed inset-0 z-30 bg-black/60 backdrop-blur-sm md:hidden"
+          onClick={() => toggle(false)}
         />
       )}
 
-      {/* Sidebar panel */}
+      {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 h-full w-56 bg-gray-900 border-r border-gray-800 flex flex-col z-40 transition-transform duration-300 ease-in-out ${
-          open ? "translate-x-0 shadow-2xl" : "-translate-x-full"
+        className={`fixed top-0 left-0 h-full bg-gray-900 border-r border-gray-800 flex flex-col z-40 transition-all duration-300 ease-in-out ${
+          open ? "w-56 shadow-2xl" : "w-12"
         }`}
       >
-        {/* Logo */}
-        <div className="flex items-center gap-2.5 px-5 py-5 border-b border-gray-800">
-          <Gem className="text-indigo-400" size={22} />
-          <div>
-            <p className="text-sm font-semibold text-white leading-tight">GemBlast</p>
-            <p className="text-xs text-gray-500 leading-tight">LTV Studio</p>
-          </div>
+        {/* Logo — visible when open */}
+        <div className={`flex items-center border-b border-gray-800 overflow-hidden transition-all duration-300 ${open ? "gap-2.5 px-4 py-5" : "px-0 py-5 justify-center"}`}>
+          {open ? (
+            <>
+              <Gem className="text-indigo-400 shrink-0" size={22} />
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-white leading-tight">GemBlast</p>
+                <p className="text-xs text-gray-500 leading-tight">LTV Studio</p>
+              </div>
+            </>
+          ) : (
+            <Gem className="text-indigo-400" size={20} />
+          )}
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 px-3 py-4 space-y-1">
+        <nav className="flex-1 px-1.5 py-4 space-y-1 overflow-hidden">
           {links.map(({ href, label, icon: Icon }) => {
             const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
             return (
               <Link
                 key={href}
                 href={href}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                title={!open ? label : undefined}
+                className={`flex items-center gap-3 px-2.5 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                  open ? "" : "justify-center"
+                } ${
                   active
                     ? "bg-indigo-600 text-white"
                     : "text-gray-400 hover:text-white hover:bg-gray-800"
                 }`}
               >
-                <Icon size={17} />
-                {label}
+                <Icon size={17} className="shrink-0" />
+                {open && <span className="whitespace-nowrap">{label}</span>}
               </Link>
             );
           })}
         </nav>
 
-        <div className="px-5 py-4 border-t border-gray-800">
-          <p className="text-xs text-gray-600">v0.1.0</p>
+        {/* Footer + toggle button */}
+        <div className="border-t border-gray-800 px-1.5 py-3 flex items-center justify-between">
+          {open && <p className="text-xs text-gray-600 px-2">v0.1.0</p>}
+          <button
+            onClick={() => toggle(!open)}
+            className={`p-2 rounded-lg text-gray-500 hover:text-white hover:bg-gray-800 transition-colors ${!open ? "mx-auto" : ""}`}
+            aria-label={open ? "Collapse sidebar" : "Expand sidebar"}
+          >
+            {open ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
+          </button>
         </div>
       </aside>
     </>
