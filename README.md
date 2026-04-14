@@ -1,6 +1,6 @@
 # GemBlast LTV Studio
 
-> **Built for learning.** This project was created in 2 days as a hands-on exploration of several things at once: using Claude Code as an AI pair programmer (reviewing every decision as it was made), building a full-stack application from scratch, and applying machine learning techniques — specifically statistical LTV models used in marketing analytics — inside a real product. As a data scientist, I wanted to bridge the gap between knowing the theory and shipping something end-to-end: a Python ML backend, a REST API, a production frontend, CI/CD, and cloud deployment. Everything here was built with that goal in mind.
+> **Built for learning.** This project was created in 3 days as a hands-on exploration of several things at once: using Claude Code as an AI pair programmer (reviewing every decision as it was made), building a full-stack application from scratch, and applying machine learning techniques — specifically statistical LTV models used in marketing analytics — inside a real product. As a data scientist, I wanted to bridge the gap between knowing the theory and shipping something end-to-end: a Python ML backend, a REST API, a production frontend, CI/CD, and cloud deployment. Everything here was built with that goal in mind.
 >
 > **Live demo:** https://playerltvstudio.vercel.app
 
